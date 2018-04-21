@@ -5,8 +5,8 @@ date: "April 19, 2018"
 output: 
     html_document:
         keep_md: true
-        fig_height: 3.5
-        fig_width: 5
+        fig_height: 5
+        fig_width: 7
         theme: spacelab
         toc: yes
         toc_depth: 4
@@ -39,7 +39,16 @@ Let's start by loading in the data from Excel.
 
 The `read_csv()` command will read a '.csv' file (comma separated values) and automatically convert it to an R dataframe. A dataframe in R is like an Excel spreadsheet, but it tends to follow a very specific format.
 
-An R dataframe has all of the *observations* (e.g. study subjects) in **rows**, and all of the *variables* (data about the subjects) in **columns**.
+
+In an R data frame:
+
+* Each *observation* (e.g. study subject) corresponds to a *row*.
+
+* Each *variable* (data about the subjects) corresponds to a *column*.
+
+* The intersection between a row and a column is a *cell*.
+
+* The value in a cell (eg., `id = 1` is referred to as an **element** or an **entry**.
 
 
 
@@ -112,7 +121,7 @@ The tidyverse is a collection of R packages that are designed for working with d
 
 * The functions can be chained, rather than nested, which makes it more similar to English, and therefore easier to read. This will be explained later.
 
-Some key tools that we will use from the tidyverse are below.
+Some key tools that we will use from the tidyverse are below. You can learn more in-depth about the tidyverse <a href="https://www.datacamp.com/community/tutorials/tidyverse-tutorial-r">here</a>
 
 ***
 
@@ -362,9 +371,88 @@ mutate(
 
 ***
 
-### Survival Analysis
+### Exploring Data with R
 
-Explain the KM curve
+R is also a very useful for data analysis because of how quickly you can summarize data. You can get descriptive statistics and visualizations very easily to help understand your data.
+
+Let's look at a few examples:
+
+***
+
+`dim` stands for 'dimensions'. It let's us summarize the dimensions of out data frame so we now how big our dataset is. It outputs the number of rows (how many observations you have) and the number of columns (how many variables you have).
+
+```r
+dim(cooties)
+```
+
+```
+## [1] 1000    8
+```
+
+***
+
+`mean` calculates the mean (as one might expect). `median` and `mode` are also avilable.
+
+`$` (*dollar*) an operator that selects a variable from a dataframe, i.e., *From the data frame `cooties`, select the variable `sex`*. You can think of it as a short-hand way of writing `select(cooties, sex)` (though it is not *exactly* the same)
+
+
+```r
+mean(cooties$sex)
+# Since sex is a binary variable (1 being male, 0 being female), we can quickly
+# calculate the proportion of males by taking the mean. Here it is about 50%.
+```
+
+```
+## [1] 0.498
+```
+
+***
+
+`summary` outputs a whole bunch of useful descriptive statistics that help describe the distribution of the variable.
+
+```r
+summary(cooties$days_in_trial)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##     3.0   600.8  1066.5  1143.9  1590.5  3384.0
+```
+
+***
+
+`hist` plots a histogram. A histogram allows you to see the distribution of your data---it plots how frequent each of the values are. This is a painstaking process in Excel, but is done in one line in R.
+
+```r
+hist(cooties$days_in_trial)
+```
+
+![](Survival_Analysis_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
+
+
+***
+
+`boxplot` plots a boxplot, which is another way that you can visualize the distribution of your data. Boxplots are particularly useful for visually comparing two distributions. For example, we can look at the differences between males and females in terms of their length on the trial.
+
+Note: The `y ~ x` notation is called a "formula". It is not necessary to fully understand this now, but here is how it works: R interprets `days_in_trial` as the response variable (i.e., the *dependent variable*), and `cooties$sex` as a predictor (i.e., an *independent variable*). Formulas are used a lot in statistical modeling functions to communicate what variable we are trying to estimate in the model and what variables we want to use to help estimate it. You can learn more <a href="http://www.dummies.com/programming/r/how-to-use-the-formula-interface-in-r/">here</a>.
+
+
+```r
+boxplot(cooties$days_in_trial ~ cooties$sex)
+```
+
+![](Survival_Analysis_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
+
+
+These quick plots get the job done, but it's not pleasing to the eye. In later sessions, we will go over how to create professional-looking plots.
+
+
+### Survival Analysis
+ 
+![](Survival_Analysis_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
+
+
+
 
 
 ```r
@@ -373,10 +461,10 @@ survival <- Surv(time = cooties$days_in_trial, event = cooties$death)
 predictor <- ifelse(cooties$treatment_arm == 1, 'Cooticure', 'Placebo')
 dd <- datadist(predictor)    # You don't need to understand this
 options(datadist = 'dd')    # You don't need to understand this
-survplot(cph(survival ~ predictor, surv = TRUE), label.curves = list(keys='lines'))
+survplot(npsurv(survival ~ predictor), label.curves = list(keys='lines'))
 ```
 
-![](Survival_Analysis_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
+![](Survival_Analysis_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
 
 
 
@@ -389,7 +477,7 @@ options(datadist = 'dd')    # You don't need to understand this
 survplot(cph(survival ~ predictor, surv = TRUE), label.curves = list(keys='lines'))
 ```
 
-![](Survival_Analysis_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
+![](Survival_Analysis_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
 
 
 
