@@ -52,7 +52,9 @@ prob_of_death <- 1 / (1 + exp(-s))
 
 cooties <- cooties %>%
     mutate(death = runif(n, 0, 1) < prob_of_death,
-           trial_exit = trial_entrance + as.integer(abs(rnorm(n, mean = 1095, sd = 800)))) %>%
+           trial_exit = trial_entrance + as.integer(abs(rnorm(n, mean = 1095, sd = 800))),
+           trial_exit = if_else(trial_exit > min(trial_exit) + 1826,    # 5 years
+                                min(trial_exit) + 1826, trial_exit)) %>%
     select(-age_continuous)
 
 write_csv(cooties, 'cooties_data.csv')
