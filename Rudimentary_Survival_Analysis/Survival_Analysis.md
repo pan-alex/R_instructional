@@ -10,6 +10,8 @@ output:
         theme: spacelab
         toc: yes
         toc_depth: 4
+editor_options: 
+  chunk_output_type: console
 ---
 
 
@@ -19,7 +21,7 @@ output:
 library(tidyverse)    # Functions to help with data manipulation
 library(lubridate)    # Functions to help handle dates
 library(survival)    # Statistical package for analyzing survival data
-library(rms)
+library(survminer)
 ```
 
 ## Introduction
@@ -74,18 +76,18 @@ cooties[1:10, ]
 
 ```
 ## # A tibble: 10 x 7
-##       id   sex    date_of_birth treatment_arm trial_entrance death trial_exit
-##    <int> <int>            <chr>         <int>         <date> <lgl>     <date>
-##  1     1     1 November 25 2002             1     2012-04-23 FALSE 2012-08-19
-##  2     2     0 December 28 2002             1     2012-01-26 FALSE 2016-06-11
-##  3     3     1 November 25 2004             1     2011-12-12  TRUE 2012-08-15
-##  4     4     1     June 13 1999             0     2010-03-23  TRUE 2015-10-21
-##  5     5     0     March 6 2005             1     2012-09-11  TRUE 2018-02-21
-##  6     6     1   January 3 2009             1     2010-05-25 FALSE 2010-09-06
-##  7     7     0   August 17 2004             0     2010-08-18  TRUE 2010-12-06
-##  8     8     0   January 2 2003             1     2010-06-18 FALSE 2014-10-08
-##  9     9     1     July 15 2000             1     2010-03-01  TRUE 2013-10-25
-## 10    10     1     June 14 2001             0     2012-02-16  TRUE 2014-11-18
+##       id   sex date_of_birth    treatment_arm trial_entrance death trial_exit
+##    <int> <int> <chr>                    <int> <date>         <lgl> <date>    
+##  1     1     1 November 25 2002             1 2012-04-23     FALSE 2012-08-19
+##  2     2     0 December 28 2002             1 2012-01-26     FALSE 2015-03-09
+##  3     3     1 November 25 2004             1 2011-12-12     TRUE  2012-08-15
+##  4     4     1 June 13 1999                 0 2010-03-23     TRUE  2015-03-09
+##  5     5     0 March 6 2005                 1 2012-09-11     TRUE  2015-03-09
+##  6     6     1 January 3 2009               1 2010-05-25     FALSE 2010-09-06
+##  7     7     0 August 17 2004               0 2010-08-18     TRUE  2010-12-06
+##  8     8     0 January 2 2003               1 2010-06-18     FALSE 2014-10-08
+##  9     9     1 July 15 2000                 1 2010-03-01     TRUE  2013-10-25
+## 10    10     1 June 14 2001                 0 2012-02-16     TRUE  2014-11-18
 ```
 
 ### Data Dictionary
@@ -137,18 +139,18 @@ filter(cooties, sex == 1, treatment_arm == 0)
 
 ```
 ## # A tibble: 251 x 7
-##       id   sex   date_of_birth treatment_arm trial_entrance death trial_exit
-##    <int> <int>           <chr>         <int>         <date> <lgl>     <date>
-##  1     4     1    June 13 1999             0     2010-03-23  TRUE 2015-10-21
-##  2    10     1    June 14 2001             0     2012-02-16  TRUE 2014-11-18
-##  3    18     1  January 1 2006             0     2012-12-26  TRUE 2014-11-03
-##  4    20     1   April 10 2006             0     2011-12-24  TRUE 2013-07-26
-##  5    27     1  January 3 2002             0     2012-11-21  TRUE 2013-09-25
-##  6    35     1 February 3 2003             0     2010-01-03  TRUE 2011-10-11
-##  7    38     1  August 19 2002             0     2012-10-13  TRUE 2016-03-15
-##  8    41     1     May 11 2006             0     2011-07-05  TRUE 2014-10-01
-##  9    54     1    April 8 1998             0     2011-08-08  TRUE 2014-04-16
-## 10    55     1 October 22 1999             0     2010-05-09  TRUE 2011-10-24
+##       id   sex date_of_birth   treatment_arm trial_entrance death trial_exit
+##    <int> <int> <chr>                   <int> <date>         <lgl> <date>    
+##  1     4     1 June 13 1999                0 2010-03-23     TRUE  2015-03-09
+##  2    10     1 June 14 2001                0 2012-02-16     TRUE  2014-11-18
+##  3    18     1 January 1 2006              0 2012-12-26     TRUE  2014-11-03
+##  4    20     1 April 10 2006               0 2011-12-24     TRUE  2013-07-26
+##  5    27     1 January 3 2002              0 2012-11-21     TRUE  2013-09-25
+##  6    35     1 February 3 2003             0 2010-01-03     TRUE  2011-10-11
+##  7    38     1 August 19 2002              0 2012-10-13     TRUE  2015-03-09
+##  8    41     1 May 11 2006                 0 2011-07-05     TRUE  2014-10-01
+##  9    54     1 April 8 1998                0 2011-08-08     TRUE  2014-04-16
+## 10    55     1 October 22 1999             0 2010-05-09     TRUE  2011-10-24
 ## # ... with 241 more rows
 ```
 
@@ -164,18 +166,18 @@ select(cooties, id, sex, date_of_birth)
 
 ```
 ## # A tibble: 1,000 x 3
-##       id   sex    date_of_birth
-##    <int> <int>            <chr>
+##       id   sex date_of_birth   
+##    <int> <int> <chr>           
 ##  1     1     1 November 25 2002
 ##  2     2     0 December 28 2002
 ##  3     3     1 November 25 2004
-##  4     4     1     June 13 1999
-##  5     5     0     March 6 2005
-##  6     6     1   January 3 2009
-##  7     7     0   August 17 2004
-##  8     8     0   January 2 2003
-##  9     9     1     July 15 2000
-## 10    10     1     June 14 2001
+##  4     4     1 June 13 1999    
+##  5     5     0 March 6 2005    
+##  6     6     1 January 3 2009  
+##  7     7     0 August 17 2004  
+##  8     8     0 January 2 2003  
+##  9     9     1 July 15 2000    
+## 10    10     1 June 14 2001    
 ## # ... with 990 more rows
 ```
 
@@ -187,18 +189,18 @@ select(cooties, -treatment_arm, -trial_entrance, -death, -trial_exit)
 
 ```
 ## # A tibble: 1,000 x 3
-##       id   sex    date_of_birth
-##    <int> <int>            <chr>
+##       id   sex date_of_birth   
+##    <int> <int> <chr>           
 ##  1     1     1 November 25 2002
 ##  2     2     0 December 28 2002
 ##  3     3     1 November 25 2004
-##  4     4     1     June 13 1999
-##  5     5     0     March 6 2005
-##  6     6     1   January 3 2009
-##  7     7     0   August 17 2004
-##  8     8     0   January 2 2003
-##  9     9     1     July 15 2000
-## 10    10     1     June 14 2001
+##  4     4     1 June 13 1999    
+##  5     5     0 March 6 2005    
+##  6     6     1 January 3 2009  
+##  7     7     0 August 17 2004  
+##  8     8     0 January 2 2003  
+##  9     9     1 July 15 2000    
+## 10    10     1 June 14 2001    
 ## # ... with 990 more rows
 ```
 
@@ -206,29 +208,29 @@ select(cooties, -treatment_arm, -trial_entrance, -death, -trial_exit)
 
 #### `mutate`
 
-Allows you to create new variables from old variables, effecively "mutating" the data frame. For example, we can make a new variable `days_in_trial` to describe how long the subject was followed. We do that by subtracting the end date (`trial_exit`) from the start date (`trial_entrance`).
+Allows you to create new variables from old variables, effecively "mutating" the data frame. For example, we can make a new variable `years_in_trial` to describe how long the subject was followed. We do that by subtracting the end date (`trial_exit`) from the start date (`trial_entrance`).
 
 Because we actually want to keep this change, we will use the assignment operator `<-` to overwrite `cooties`
 
 ```r
-cooties <- mutate(cooties, days_in_trial = as.numeric(trial_exit - trial_entrance))
+cooties <- mutate(cooties, years_in_trial = as.numeric(trial_exit - trial_entrance) / 365.25)
 cooties
 ```
 
 ```
 ## # A tibble: 1,000 x 8
-##       id   sex    date_of_birth treatment_arm trial_entrance death trial_exit days_in_trial
-##    <int> <int>            <chr>         <int>         <date> <lgl>     <date>         <dbl>
-##  1     1     1 November 25 2002             1     2012-04-23 FALSE 2012-08-19           118
-##  2     2     0 December 28 2002             1     2012-01-26 FALSE 2016-06-11          1598
-##  3     3     1 November 25 2004             1     2011-12-12  TRUE 2012-08-15           247
-##  4     4     1     June 13 1999             0     2010-03-23  TRUE 2015-10-21          2038
-##  5     5     0     March 6 2005             1     2012-09-11  TRUE 2018-02-21          1989
-##  6     6     1   January 3 2009             1     2010-05-25 FALSE 2010-09-06           104
-##  7     7     0   August 17 2004             0     2010-08-18  TRUE 2010-12-06           110
-##  8     8     0   January 2 2003             1     2010-06-18 FALSE 2014-10-08          1573
-##  9     9     1     July 15 2000             1     2010-03-01  TRUE 2013-10-25          1334
-## 10    10     1     June 14 2001             0     2012-02-16  TRUE 2014-11-18          1006
+##       id   sex date_of_birth    treatment_arm trial_entrance death trial_exit years_in_trial
+##    <int> <int> <chr>                    <int> <date>         <lgl> <date>              <dbl>
+##  1     1     1 November 25 2002             1 2012-04-23     FALSE 2012-08-19          0.323
+##  2     2     0 December 28 2002             1 2012-01-26     FALSE 2015-03-09          3.12 
+##  3     3     1 November 25 2004             1 2011-12-12     TRUE  2012-08-15          0.676
+##  4     4     1 June 13 1999                 0 2010-03-23     TRUE  2015-03-09          4.96 
+##  5     5     0 March 6 2005                 1 2012-09-11     TRUE  2015-03-09          2.49 
+##  6     6     1 January 3 2009               1 2010-05-25     FALSE 2010-09-06          0.285
+##  7     7     0 August 17 2004               0 2010-08-18     TRUE  2010-12-06          0.301
+##  8     8     0 January 2 2003               1 2010-06-18     FALSE 2014-10-08          4.31 
+##  9     9     1 July 15 2000                 1 2010-03-01     TRUE  2013-10-25          3.65 
+## 10    10     1 June 14 2001                 0 2012-02-16     TRUE  2014-11-18          2.75 
 ## # ... with 990 more rows
 ```
 
@@ -247,18 +249,18 @@ mutate(cooties, sex = ifelse(sex == 1, 'Male', 'Female'))
 
 ```
 ## # A tibble: 1,000 x 8
-##       id    sex    date_of_birth treatment_arm trial_entrance death trial_exit days_in_trial
-##    <int>  <chr>            <chr>         <int>         <date> <lgl>     <date>         <dbl>
-##  1     1   Male November 25 2002             1     2012-04-23 FALSE 2012-08-19           118
-##  2     2 Female December 28 2002             1     2012-01-26 FALSE 2016-06-11          1598
-##  3     3   Male November 25 2004             1     2011-12-12  TRUE 2012-08-15           247
-##  4     4   Male     June 13 1999             0     2010-03-23  TRUE 2015-10-21          2038
-##  5     5 Female     March 6 2005             1     2012-09-11  TRUE 2018-02-21          1989
-##  6     6   Male   January 3 2009             1     2010-05-25 FALSE 2010-09-06           104
-##  7     7 Female   August 17 2004             0     2010-08-18  TRUE 2010-12-06           110
-##  8     8 Female   January 2 2003             1     2010-06-18 FALSE 2014-10-08          1573
-##  9     9   Male     July 15 2000             1     2010-03-01  TRUE 2013-10-25          1334
-## 10    10   Male     June 14 2001             0     2012-02-16  TRUE 2014-11-18          1006
+##       id sex    date_of_birth    treatment_arm trial_entrance death trial_exit years_in_trial
+##    <int> <chr>  <chr>                    <int> <date>         <lgl> <date>              <dbl>
+##  1     1 Male   November 25 2002             1 2012-04-23     FALSE 2012-08-19          0.323
+##  2     2 Female December 28 2002             1 2012-01-26     FALSE 2015-03-09          3.12 
+##  3     3 Male   November 25 2004             1 2011-12-12     TRUE  2012-08-15          0.676
+##  4     4 Male   June 13 1999                 0 2010-03-23     TRUE  2015-03-09          4.96 
+##  5     5 Female March 6 2005                 1 2012-09-11     TRUE  2015-03-09          2.49 
+##  6     6 Male   January 3 2009               1 2010-05-25     FALSE 2010-09-06          0.285
+##  7     7 Female August 17 2004               0 2010-08-18     TRUE  2010-12-06          0.301
+##  8     8 Female January 2 2003               1 2010-06-18     FALSE 2014-10-08          4.31 
+##  9     9 Male   July 15 2000                 1 2010-03-01     TRUE  2013-10-25          3.65 
+## 10    10 Male   June 14 2001                 0 2012-02-16     TRUE  2014-11-18          2.75 
 ## # ... with 990 more rows
 ```
 
@@ -287,18 +289,18 @@ separate(cooties,
 
 ```
 ## # A tibble: 1,000 x 10
-##       id   sex dob_month dob_day dob_year treatment_arm trial_entrance death trial_exit days_in_trial
-##  * <int> <int>     <chr>   <chr>    <chr>         <int>         <date> <lgl>     <date>         <dbl>
-##  1     1     1  November      25     2002             1     2012-04-23 FALSE 2012-08-19           118
-##  2     2     0  December      28     2002             1     2012-01-26 FALSE 2016-06-11          1598
-##  3     3     1  November      25     2004             1     2011-12-12  TRUE 2012-08-15           247
-##  4     4     1      June      13     1999             0     2010-03-23  TRUE 2015-10-21          2038
-##  5     5     0     March       6     2005             1     2012-09-11  TRUE 2018-02-21          1989
-##  6     6     1   January       3     2009             1     2010-05-25 FALSE 2010-09-06           104
-##  7     7     0    August      17     2004             0     2010-08-18  TRUE 2010-12-06           110
-##  8     8     0   January       2     2003             1     2010-06-18 FALSE 2014-10-08          1573
-##  9     9     1      July      15     2000             1     2010-03-01  TRUE 2013-10-25          1334
-## 10    10     1      June      14     2001             0     2012-02-16  TRUE 2014-11-18          1006
+##       id   sex dob_month dob_day dob_year treatment_arm trial_entrance death trial_exit years_in_trial
+##    <int> <int> <chr>     <chr>   <chr>            <int> <date>         <lgl> <date>              <dbl>
+##  1     1     1 November  25      2002                 1 2012-04-23     FALSE 2012-08-19          0.323
+##  2     2     0 December  28      2002                 1 2012-01-26     FALSE 2015-03-09          3.12 
+##  3     3     1 November  25      2004                 1 2011-12-12     TRUE  2012-08-15          0.676
+##  4     4     1 June      13      1999                 0 2010-03-23     TRUE  2015-03-09          4.96 
+##  5     5     0 March     6       2005                 1 2012-09-11     TRUE  2015-03-09          2.49 
+##  6     6     1 January   3       2009                 1 2010-05-25     FALSE 2010-09-06          0.285
+##  7     7     0 August    17      2004                 0 2010-08-18     TRUE  2010-12-06          0.301
+##  8     8     0 January   2       2003                 1 2010-06-18     FALSE 2014-10-08          4.31 
+##  9     9     1 July      15      2000                 1 2010-03-01     TRUE  2013-10-25          3.65 
+## 10    10     1 June      14      2001                 0 2012-02-16     TRUE  2014-11-18          2.75 
 ## # ... with 990 more rows
 ```
 
@@ -326,18 +328,18 @@ cooties %>%
 
 ```
 ## # A tibble: 644 x 7
-##       id    date_of_birth treatment_arm trial_entrance death trial_exit days_in_trial
-##    <int>            <chr>         <chr>         <date> <lgl>     <date>         <dbl>
-##  1     3 November 25 2004     Cooticure     2011-12-12  TRUE 2012-08-15           247
-##  2     4     June 13 1999       Placebo     2010-03-23  TRUE 2015-10-21          2038
-##  3     5     March 6 2005     Cooticure     2012-09-11  TRUE 2018-02-21          1989
-##  4     7   August 17 2004       Placebo     2010-08-18  TRUE 2010-12-06           110
-##  5     9     July 15 2000     Cooticure     2010-03-01  TRUE 2013-10-25          1334
-##  6    10     June 14 2001       Placebo     2012-02-16  TRUE 2014-11-18          1006
-##  7    11   January 2 1997       Placebo     2012-06-13  TRUE 2013-09-04           448
-##  8    16      May 12 1999     Cooticure     2012-11-16  TRUE 2014-12-03           747
-##  9    18   January 1 2006       Placebo     2012-12-26  TRUE 2014-11-03           677
-## 10    19 November 24 2006     Cooticure     2012-10-12  TRUE 2015-02-23           864
+##       id date_of_birth    treatment_arm trial_entrance death trial_exit years_in_trial
+##    <int> <chr>            <chr>         <date>         <lgl> <date>              <dbl>
+##  1     3 November 25 2004 Cooticure     2011-12-12     TRUE  2012-08-15          0.676
+##  2     4 June 13 1999     Placebo       2010-03-23     TRUE  2015-03-09          4.96 
+##  3     5 March 6 2005     Cooticure     2012-09-11     TRUE  2015-03-09          2.49 
+##  4     7 August 17 2004   Placebo       2010-08-18     TRUE  2010-12-06          0.301
+##  5     9 July 15 2000     Cooticure     2010-03-01     TRUE  2013-10-25          3.65 
+##  6    10 June 14 2001     Placebo       2012-02-16     TRUE  2014-11-18          2.75 
+##  7    11 January 2 1997   Placebo       2012-06-13     TRUE  2013-09-04          1.23 
+##  8    16 May 12 1999      Cooticure     2012-11-16     TRUE  2014-12-03          2.05 
+##  9    18 January 1 2006   Placebo       2012-12-26     TRUE  2014-11-03          1.85 
+## 10    19 November 24 2006 Cooticure     2012-10-12     TRUE  2015-02-23          2.37 
 ## # ... with 634 more rows
 ```
 
@@ -353,18 +355,18 @@ mutate(
 
 ```
 ## # A tibble: 644 x 7
-##       id    date_of_birth treatment_arm trial_entrance death trial_exit days_in_trial
-##    <int>            <chr>         <chr>         <date> <lgl>     <date>         <dbl>
-##  1     3 November 25 2004     Cooticure     2011-12-12  TRUE 2012-08-15           247
-##  2     4     June 13 1999       Placebo     2010-03-23  TRUE 2015-10-21          2038
-##  3     5     March 6 2005     Cooticure     2012-09-11  TRUE 2018-02-21          1989
-##  4     7   August 17 2004       Placebo     2010-08-18  TRUE 2010-12-06           110
-##  5     9     July 15 2000     Cooticure     2010-03-01  TRUE 2013-10-25          1334
-##  6    10     June 14 2001       Placebo     2012-02-16  TRUE 2014-11-18          1006
-##  7    11   January 2 1997       Placebo     2012-06-13  TRUE 2013-09-04           448
-##  8    16      May 12 1999     Cooticure     2012-11-16  TRUE 2014-12-03           747
-##  9    18   January 1 2006       Placebo     2012-12-26  TRUE 2014-11-03           677
-## 10    19 November 24 2006     Cooticure     2012-10-12  TRUE 2015-02-23           864
+##       id date_of_birth    treatment_arm trial_entrance death trial_exit years_in_trial
+##    <int> <chr>            <chr>         <date>         <lgl> <date>              <dbl>
+##  1     3 November 25 2004 Cooticure     2011-12-12     TRUE  2012-08-15          0.676
+##  2     4 June 13 1999     Placebo       2010-03-23     TRUE  2015-03-09          4.96 
+##  3     5 March 6 2005     Cooticure     2012-09-11     TRUE  2015-03-09          2.49 
+##  4     7 August 17 2004   Placebo       2010-08-18     TRUE  2010-12-06          0.301
+##  5     9 July 15 2000     Cooticure     2010-03-01     TRUE  2013-10-25          3.65 
+##  6    10 June 14 2001     Placebo       2012-02-16     TRUE  2014-11-18          2.75 
+##  7    11 January 2 1997   Placebo       2012-06-13     TRUE  2013-09-04          1.23 
+##  8    16 May 12 1999      Cooticure     2012-11-16     TRUE  2014-12-03          2.05 
+##  9    18 January 1 2006   Placebo       2012-12-26     TRUE  2014-11-03          1.85 
+## 10    19 November 24 2006 Cooticure     2012-10-12     TRUE  2015-02-23          2.37 
 ## # ... with 634 more rows
 ```
 
@@ -411,12 +413,12 @@ mean(cooties$sex)
 `summary` outputs a whole bunch of useful descriptive statistics that help describe the distribution of the variable.
 
 ```r
-summary(cooties$days_in_trial)
+summary(cooties$years_in_trial)
 ```
 
 ```
-##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##     3.0   600.8  1066.5  1143.9  1590.5  3384.0
+##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+## 0.008214 1.644764 2.525667 2.504695 3.364819 5.138946
 ```
 
 ***
@@ -424,7 +426,7 @@ summary(cooties$days_in_trial)
 `hist` plots a histogram. A histogram allows you to see the distribution of your data---it plots how frequent each of the values are. This is a painstaking process in Excel, but is done in one line in R.
 
 ```r
-hist(cooties$days_in_trial)
+hist(cooties$years_in_trial)
 ```
 
 ![](Survival_Analysis_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
@@ -434,50 +436,60 @@ hist(cooties$days_in_trial)
 
 `boxplot` plots a boxplot, which is another way that you can visualize the distribution of your data. Boxplots are particularly useful for visually comparing two distributions. For example, we can look at the differences between males and females in terms of their length on the trial.
 
-Note: The `y ~ x` notation is called a "formula". It is not necessary to fully understand this now, but here is how it works: R interprets `days_in_trial` as the response variable (i.e., the *dependent variable*), and `cooties$sex` as a predictor (i.e., an *independent variable*). Formulas are used a lot in statistical modeling functions to communicate what variable we are trying to estimate in the model and what variables we want to use to help estimate it. You can learn more <a href="http://www.dummies.com/programming/r/how-to-use-the-formula-interface-in-r/">here</a>.
+Note: The `y ~ x` notation is called a "formula". It is not necessary to fully understand this now, but here is how it works: R interprets `years_in_trial` as the response variable (i.e., the *dependent variable*), and `cooties$sex` as a predictor (i.e., an *independent variable*). Formulas are used a lot in statistical modeling functions to communicate what variable we are trying to estimate in the model and what variables we want to use to help estimate it. You can learn more <a href="http://www.dummies.com/programming/r/how-to-use-the-formula-interface-in-r/">here</a>.
 
 
 ```r
-boxplot(cooties$days_in_trial ~ cooties$sex)
+boxplot(cooties$years_in_trial ~ cooties$sex)
 ```
 
 ![](Survival_Analysis_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
 
 
-These quick plots get the job done, but it's not pleasing to the eye. In later sessions, we will go over how to create professional-looking plots.
+These quick plots get the job done, but it's not pleasing to the eye. In later sessions, we will go over how to create more professional-looking plots.
 
 
 ### Survival Analysis
  
-![](Survival_Analysis_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
+Create a model for `death ~ treatment_arm`
+ 
 
-
-
+```r
+survival <- survfit(
+  Surv(time = years_in_trial, event = death) ~ treatment_arm,
+  data = cooties
+  )
+```
 
 
 ```r
-survival <- Surv(time = cooties$days_in_trial, event = cooties$death)
-
-predictor <- ifelse(cooties$treatment_arm == 1, 'Cooticure', 'Placebo')
-dd <- datadist(predictor)    # You don't need to understand this
-options(datadist = 'dd')    # You don't need to understand this
-survplot(npsurv(survival ~ predictor), label.curves = list(keys='lines'))
+ggsurvplot(survival,
+           linetype = 'strata',
+           conf.int = T,
+           pval = T)
 ```
 
 ![](Survival_Analysis_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
 
+The effect of `sex` within the treatment arm
 
 
 ```r
-survival <- Surv(time = cooties$days_in_trial, event = cooties$death)
-
-predictor <- ifelse(cooties$sex == 1, 'Male', 'Female')
-dd <- datadist(predictor)    # You don't need to understand this
-options(datadist = 'dd')    # You don't need to understand this
-survplot(cph(survival ~ predictor, surv = TRUE), label.curves = list(keys='lines'))
+survival <- survfit(
+  Surv(time = years_in_trial, event = death) ~ sex,
+  data = filter(cooties, treatment_arm == 1)
+  )
 ```
 
-![](Survival_Analysis_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
 
+```r
+ggsurvplot(survival,
+           linetype = 'strata',
+           conf.int = T,
+           pval = T)
+```
 
+![](Survival_Analysis_files/figure-html/unnamed-chunk-20-1.png)<!-- -->
+
+What other interesting trends exist in the data?
 

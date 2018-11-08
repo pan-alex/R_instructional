@@ -10,18 +10,21 @@ output:
         theme: spacelab
         toc: yes
         toc_depth: 4
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, results = 'hold')
 options(width = 200)
+# setwd('R/R_Instructional/Rudimentary_Survival_Analysis')
 ```
 
 ```{r, results = FALSE}
 library(tidyverse)    # Functions to help with data manipulation
 library(lubridate)    # Functions to help handle dates
 library(survival)    # Statistical package for analyzing survival data
-library(rms)
+library(survminer)
 ```
 
 ## Introduction
@@ -136,11 +139,11 @@ select(cooties, -treatment_arm, -trial_entrance, -death, -trial_exit)
 
 #### `mutate`
 
-Allows you to create new variables from old variables, effecively "mutating" the data frame. For example, we can make a new variable `days_in_trial` to describe how long the subject was followed. We do that by subtracting the end date (`trial_exit`) from the start date (`trial_entrance`).
+Allows you to create new variables from old variables, effecively "mutating" the data frame. For example, we can make a new variable `years_in_trial` to describe how long the subject was followed. We do that by subtracting the end date (`trial_exit`) from the start date (`trial_entrance`).
 
 Because we actually want to keep this change, we will use the assignment operator `<-` to overwrite `cooties`
 ```{r}
-cooties <- mutate(cooties, days_in_trial = as.numeric(trial_exit - trial_entrance))
+cooties <- mutate(cooties, years_in_trial = as.numeric(trial_exit - trial_entrance) / 365.25)
 cooties
 ```
 
@@ -240,14 +243,14 @@ mean(cooties$sex)
 
 `summary` outputs a whole bunch of useful descriptive statistics that help describe the distribution of the variable.
 ```{r}
-summary(cooties$days_in_trial)
+summary(cooties$years_in_trial)
 ```
 
 ***
 
 `hist` plots a histogram. A histogram allows you to see the distribution of your data---it plots how frequent each of the values are. This is a painstaking process in Excel, but is done in one line in R.
 ```{r, fig.height = 4, fig.width = 4}
-hist(cooties$days_in_trial)
+hist(cooties$years_in_trial)
 ```
 
 
@@ -255,51 +258,49 @@ hist(cooties$days_in_trial)
 
 `boxplot` plots a boxplot, which is another way that you can visualize the distribution of your data. Boxplots are particularly useful for visually comparing two distributions. For example, we can look at the differences between males and females in terms of their length on the trial.
 
-Note: The `y ~ x` notation is called a "formula". It is not necessary to fully understand this now, but here is how it works: R interprets `days_in_trial` as the response variable (i.e., the *dependent variable*), and `cooties$sex` as a predictor (i.e., an *independent variable*). Formulas are used a lot in statistical modeling functions to communicate what variable we are trying to estimate in the model and what variables we want to use to help estimate it. You can learn more <a href="http://www.dummies.com/programming/r/how-to-use-the-formula-interface-in-r/">here</a>.
+Note: The `y ~ x` notation is called a "formula". It is not necessary to fully understand this now, but here is how it works: R interprets `years_in_trial` as the response variable (i.e., the *dependent variable*), and `cooties$sex` as a predictor (i.e., an *independent variable*). Formulas are used a lot in statistical modeling functions to communicate what variable we are trying to estimate in the model and what variables we want to use to help estimate it. You can learn more <a href="http://www.dummies.com/programming/r/how-to-use-the-formula-interface-in-r/">here</a>.
 
 ```{r, fig.height = 4, fig.width = 4}
-boxplot(cooties$days_in_trial ~ cooties$sex)
+boxplot(cooties$years_in_trial ~ cooties$sex)
 ```
 
 
-These quick plots get the job done, but it's not pleasing to the eye. In later sessions, we will go over how to create professional-looking plots.
+These quick plots get the job done, but it's not pleasing to the eye. In later sessions, we will go over how to create more professional-looking plots.
 
 
 ### Survival Analysis
  
-```{r, echo = FALSE}
-survival <- Surv(time = cooties$days_in_trial / 365.25,
-                 event = cooties$death)
-
-survplot(npsurv(survival ~ 1), 
-         label.curves = list(keys='lines'),
-         n.risk = T, 
-         conf = 'none',
-         xlab = 'Years')
-title('Survival across the entire trial')
+Create a model for `death ~ treatment_arm`
+ 
+```{r}
+survival <- survfit(
+  Surv(time = years_in_trial, event = death) ~ treatment_arm,
+  data = cooties
+  )
 ```
-
-
-
 
 ```{r}
-survival <- Surv(time = cooties$days_in_trial, event = cooties$death)
-
-predictor <- ifelse(cooties$treatment_arm == 1, 'Cooticure', 'Placebo')
-dd <- datadist(predictor)    # You don't need to understand this
-options(datadist = 'dd')    # You don't need to understand this
-survplot(npsurv(survival ~ predictor), label.curves = list(keys='lines'))
+ggsurvplot(survival,
+           linetype = 'strata',
+           conf.int = T,
+           pval = T)
 ```
 
+The effect of `sex` within the treatment arm
 
 ```{r}
-survival <- Surv(time = cooties$days_in_trial, event = cooties$death)
-
-predictor <- ifelse(cooties$sex == 1, 'Male', 'Female')
-dd <- datadist(predictor)    # You don't need to understand this
-options(datadist = 'dd')    # You don't need to understand this
-survplot(cph(survival ~ predictor, surv = TRUE), label.curves = list(keys='lines'))
+survival <- survfit(
+  Surv(time = years_in_trial, event = death) ~ sex,
+  data = filter(cooties, treatment_arm == 1)
+  )
 ```
 
+```{r}
+ggsurvplot(survival,
+           linetype = 'strata',
+           conf.int = T,
+           pval = T)
+```
 
+What other interesting trends exist in the data?
 
